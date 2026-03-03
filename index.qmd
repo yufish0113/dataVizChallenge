@@ -32,59 +32,6 @@ This challenge pushes boundaries intentionally. You'll tackle problems that norm
 **The new reality:** The four stages of competence are Ignorance → Awareness → Learning → Mastery. AI lets us produce Mastery-level work while operating primarily in the Awareness stage. I focus on awareness training, you leverage AI for execution, and together we create outputs that used to require years of dedicated study.
 :::
 
-## Getting Started: Repository Setup
-
-::: {.callout-important}
-## 📁 Getting Started
-
-**Step 1:** Fork and clone this challenge repository: `https://github.com/flyaflya/dataVizChallenge.git`
-
-- View the original challenge page: <https://flyaflya.github.io/dataVizChallenge/>
-- Fork it to your GitHub account, then clone it from your GitHub account to your local machine
-
-**Step 2:** Set up your Python environment
-
-- **Recommended:** Use your existing virtual environment from Tech Setup Challenge Part 2
-  - Press `Ctrl+Shift+P` → "Python: Select Interpreter"
-  - Navigate to your existing virtual environment (e.g., `your-previous-project/venv/Scripts/python.exe`)
-  - Install additional packages: `pip install pandas numpy matplotlib seaborn`
-- **Alternative:** Create a new virtual environment following [Quarto documentation](https://quarto.org/docs/projects/virtual-environments.html)
-
-**Step 3:** You're ready to start! The data loading code and starter code for the visualizations are already provided in this file.
-
-**Note:** This challenge uses the same `index.qmd` file you're reading right now - you'll edit it to complete your analysis.
-
-**Before publishing:** Remove or comment out the "Getting Started" and "Grading and Submission" sections from your final GitHub Pages version so your published page reads as a cohesive Coors Field analysis story.
-:::
-
-::: {.callout-warning}
-## ⚠️ Cloud Storage Warning
-
-**Avoid using Google Drive, OneDrive, or other cloud storage for Python projects!** These services can cause issues with package installations and virtual environment corruption. Keep your Python projects in a local folder like `C:\Users\YourName\Documents\` instead.
-:::
-
-::: {.callout-warning}
-## 💾 Important: Save Your Work Frequently!
-
-**Before you start:** Make sure to commit your work often using the Source Control panel in Cursor (Ctrl+Shift+G or Cmd+Shift+G). This prevents the AI from overwriting your progress and ensures you don't lose your work.
-
-**Commit after each major step:**
-
-- After completing each stage section
-- After adding your visualizations
-- After completing your advanced object-oriented techniques
-- Before asking the AI for help with new code
-
-**How to commit:**
-
-1. Open Source Control panel (Ctrl+Shift+G)
-2. Stage your changes (+ button)
-3. Write a descriptive commit message
-4. Click the checkmark to commit
-
-*Remember: Frequent commits are your safety net!*
-:::
-
 ## The Four Stages of Data Visualization
 
 The four essential stages for creating effective visualizations are:
@@ -160,6 +107,9 @@ Our purpose is to investigate whether Coors Field in Denver, Colorado is truly t
 
 **Question 1: Hypothesis Formation**
 - Why might high altitude affect baseball performance?  Is Coors Field affected by high altitude?
+- Answers: 
+(1) High altitude can affect baseball performance because the air is thinner and less dense. When the air is thinner, there is less air resistance, so the ball can travel farther after it is hit. This may increase the number of home runs and total runs scored.
+(2) Coors Field is located in Denver, which has a high altitude of about 5,280 feet above sea level. Therefore, it is likely affected by high altitude, and this could make it more run-friendly than other stadiums.
 :::
 
 ## Stage 2: Curation of Content
@@ -204,6 +154,10 @@ print(avgDF_2021.head())
 
 **Question 1: Data Aggregation Strategy**
 - How many games are in the dataset? Why do we aggregate individual games into stadium averages before we start the visualization process?
+- Answers: 
+(1) The 2010 dataset contains 2,430 games, and the 2021 dataset contains 2,429 games. 
+(2) Because by aggregating individual games into stadium averages, it allows us to see the average number of runs scored by each stadium over the course of the season. One single game does not represent the true scoring environment of a stadium. Individual games can be affected by many random factors.
+Therefore, calculating the average runs per stadium over the whole season is useful for comparing the performance of different stadiums and getting a more reliable measure of how run-friendly each stadium really is.
 :::
 
 ## Stage 3: Structuring of Visual Mappings
@@ -268,11 +222,16 @@ plt.show()
 **Question 1: Geometry Choices**
 - Why is a horizontal bar chart better than a scatter plot for this data?
 - When would you choose a vertical bar chart over horizontal?
+- Answers: 
+(1) A horizontal bar chart is more effective and intuitive for this data. Scatter plots are better for showing relationships between two numerical variables, but here we are comparing values across categories (comparing average runs across different stadiums, which are categorical variables). Bar charts make comparisons clearer.
+(2) The difference between horizontal and vertical depends on the number of categories. A vertical bar chart works well when there are fewer categories. When there are many stadiums or long names, a horizontal bar chart would be easier to read.
 
 **Question 2: Aesthetic Mappings**
 - What does the color highlighting accomplish in Approach 4?
 - How does position (x/y) compare to color for encoding data?
-
+- Answers: 
+(1) The color highlighting helps draw attention to ‘COL’. It makes it easier for the audience to get the idea that Colorado's average runs are higher than other stadiums, which is the focus of our research question.
+(2) Position (x/y) is more effective and accurate for encoding numerical values because humans are better at comparing lengths and positions. Color is mainly used to highlight or emphasize specific categories.
 :::
 
 ## Stage 4: Formatting for Your Audience
@@ -346,7 +305,22 @@ print(f"Colorado is {((colorado_runs / avgDF_2010_sorted.totalRuns.mean()) - 1) 
 **Question 1: Professional Formatting**
 - What elements make this visualization suitable for a business presentation?
 - Is the annotation on the visualization helpful?  Can you fix its placement?
+- Answers: 
+(1) This visualization communicates the key message to audiences directly. It added titles and lables, the axis labels clearly define the metrics. It also consistent color coding, which highlights ‘COL’ in purple while keeping other stadiums neutral. The legend is clean and professional. The annotation directly communicates Colorado’s performance, making the insight easier to understand. 
+(2) The annotation on the visualization is helpful because it directly highlights Colorado’s performance. 
+But its position appears slightly misaligned, it should be pointing at ‘COL’, but the index used does not match the bar’s visual position. The annotation should be moved slightly upward so that the arrow correctly points to the Colorado bar.
+(3) How to fix: 
+colorado_position = list(avgDF_2010_sorted.home).index("COL")
+colorado_runs = avgDF_2010_sorted.loc[
+    avgDF_2010_sorted.home == "COL", "totalRuns"
+].iloc[0]
 
+ax.annotate(
+    f"COL: {colorado_runs:.2f} runs/game",
+    xy=(colorado_runs, colorado_position),
+    xytext=(colorado_runs + 0.5, colorado_position),
+    arrowprops=dict(arrowstyle='->'),
+)
 :::
 
 
@@ -380,6 +354,7 @@ comparison_data = pd.merge(
 **Question 1: Using Subplot Layout**
 - Create a two-facet visualization that shows the total runs for 2010 and 2021 for each stadium in a single figure.  Highlight Colorado in the visualization.
 
+
 **Question 2: Explanation of the Visualization**
 - Ask AI To Add A Paragraph Here To Explain The Visualization
 - Does AI come to the right conclusion?  If not, why not?
@@ -411,25 +386,3 @@ comparison_data = pd.merge(
 - Be appropriate for a business audience
 - Show mastery of object-oriented matplotlib
 - Do not `echo` the code that creates the visualizations
-
-## Grading and Submission
-
-**Submission Checklist:**
-
-- [ ] Fork repository to your GitHub account
-- [ ] Clone locally using Cursor (or VS Code)
-- [ ] Complete discussion questions
-- [ ] Render document to HTML successfully
-- [ ] Push HTML files to your repository
-- [ ] Enable GitHub Pages
-- [ ] Verify site at `https://[your-username].github.io/dataVizChallenge/`
-
-**Grading:**
-
-| Grade | Requirements |
-|-------|--------------|
-| Minimum | Discussion questions for at least 3 of 4 stages; working GitHub Pages site |
-| 85% | All 4 stages with comprehensive, well-reasoned responses |
-| 100% | All discussion questions plus professional visualizations demonstrating mastery |
-
-**Report Quality:** Professional writing, concise analysis, clear demonstration of object-oriented matplotlib.
