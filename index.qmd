@@ -94,6 +94,10 @@ print(df2010.head())
 1. Is Coors Field (COL) the most run-friendly ballpark in 2010?
 2. How does this change in 2021?
 3. What's the difference between total runs and home runs by stadium?
+- Answers:
+(1) Yes, Coors Field is the most run-friendly ballpark in 2010. It has the highest average runs per game of 10.4.
+(2) In 2021, Coors Field remains among the top 3 highest-scoring stadiums, but the gap relative to other ballparks narrows.
+(3) The difference between total runs and home runs by stadium is that total runs is the sum of runs scored by both the home team and the visiting team, while home runs is the number of home runs scored by the home team, meaning a stadium can have high home run rates without necessarily leading in total scoring.
 :::
 
 ## Stage 1: Declaration of Purpose
