@@ -343,9 +343,6 @@ comparison_data = pd.merge(
     avgDF_2021[['home', 'totalRuns']].rename(columns={'totalRuns': 'runs_2021'}),
     on='home', how='inner'
 )
-
-## TODO: Create the visualization
-
 ```
 
 ::: {.callout-important}
@@ -354,10 +351,61 @@ comparison_data = pd.merge(
 **Question 1: Using Subplot Layout**
 - Create a two-facet visualization that shows the total runs for 2010 and 2021 for each stadium in a single figure.  Highlight Colorado in the visualization.
 
+```{python}
+#| label: question-1-two-facet
+#| echo: true
+#| fig-width: 10
+#| fig-height: 8
+#| out-width: "100%"
+
+# Two-facet visualization: total runs by stadium for 2010 and 2021, Colorado highlighted
+
+# Sort each year by total runs for consistent bar order
+df_2010_sorted = avgDF_2010.sort_values("totalRuns", ascending=True)
+df_2021_sorted = avgDF_2021.sort_values("totalRuns", ascending=True)
+
+# Create figure with 1 row, 2 columns (two facets)
+fig, axes = plt.subplots(1, 2, figsize=(10, 8))
+
+# Colors: highlight Colorado (COL), grey for others
+colors_2010 = ["darkorchid" if s == "COL" else "lightgrey" for s in df_2010_sorted.home]
+colors_2021 = ["darkorchid" if s == "COL" else "lightgrey" for s in df_2021_sorted.home]
+
+# Facet 1: 2010
+axes[0].barh(df_2010_sorted.home, df_2010_sorted.totalRuns, color=colors_2010)
+axes[0].set_title("2010: Total Runs per Stadium", fontsize=12, fontweight="bold")
+axes[0].set_xlabel("Average Runs Per Game")
+axes[0].set_ylabel("Stadium (Home Team)")
+axes[0].tick_params(axis="y", labelsize=9)
+axes[0].set_xlim(0, df_2010_sorted.totalRuns.max() * 1.1)
+
+# Facet 2: 2021
+axes[1].barh(df_2021_sorted.home, df_2021_sorted.totalRuns, color=colors_2021)
+axes[1].set_title("2021: Total Runs per Stadium", fontsize=12, fontweight="bold")
+axes[1].set_xlabel("Average Runs Per Game")
+axes[1].set_ylabel("Stadium (Home Team)")
+axes[1].tick_params(axis="y", labelsize=9)
+axes[1].set_xlim(0, df_2021_sorted.totalRuns.max() * 1.1)
+
+# Shared legend
+colorado_patch = plt.Rectangle((0, 0), 1, 1, color="darkorchid", label="Colorado (COL)")
+other_patch = plt.Rectangle((0, 0), 1, 1, color="lightgrey", label="Other Stadiums")
+fig.legend(handles=[colorado_patch, other_patch], loc="upper center", ncol=2, frameon=True)
+
+plt.suptitle("Total Runs by Stadium: 2010 vs 2021", fontsize=14, fontweight="bold", y=1.02)
+plt.tight_layout()
+plt.show()
+```
 
 **Question 2: Explanation of the Visualization**
 - Ask AI To Add A Paragraph Here To Explain The Visualization
+- Answers: 
+The visualization shows that Colorado has the highest average runs per game in both 2010 and 2021. This is consistent with the hypothesis that Coors Field is the most run-friendly ballpark in Major League Baseball.  
+
 - Does AI come to the right conclusion?  If not, why not?
+- Answers: 
+I think the AI’s conclusion is not fully correct. While Colorado has the highest average runs per game in 2010, it is not the highest in 2021. In 2021, other stadiums such as Boston and Baltimore appear to have slightly higher average runs per game. 
+Also, the visualization does not come to the right conclusion because it does not show the difference between the average runs per game in 2010 and 2021. It only shows the total runs by stadium for both years.
 :::
 
 ## Student Analysis Section: Mastering Object-Oriented Matplotlib {#student-analysis-section}
@@ -386,3 +434,93 @@ comparison_data = pd.merge(
 - Be appropriate for a business audience
 - Show mastery of object-oriented matplotlib
 - Do not `echo` the code that creates the visualizations
+
+## Visualization Task Answers:
+```{python}
+# Professional Object-Oriented Visualization
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+# Merge data
+comparison = pd.merge(
+    avgDF_2010[['home', 'totalRuns']].rename(columns={'totalRuns': 'runs_2010'}),
+    avgDF_2021[['home', 'totalRuns']].rename(columns={'totalRuns': 'runs_2021'}),
+    on='home',
+    how='inner'
+)
+
+# Sort by 2010 to maintain consistent order
+comparison = comparison.sort_values("runs_2010", ascending=True)
+
+# League averages
+league_avg_2010 = comparison["runs_2010"].mean()
+league_avg_2021 = comparison["runs_2021"].mean()
+
+# Colors
+colors = ["darkorchid" if s == "COL" else "lightgrey"
+          for s in comparison["home"]]
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 9), sharey=True)
+
+# ----- 2010 -----
+axes[0].barh(comparison["home"], comparison["runs_2010"], color=colors)
+axes[0].axvline(league_avg_2010, linestyle="--", linewidth=1)
+axes[0].set_title("2010 Average Runs per Game", fontsize=13, fontweight="bold")
+axes[0].set_xlabel("Average Runs per Game")
+axes[0].set_xlim(0, comparison["runs_2010"].max() * 1.15)
+
+# ----- 2021 -----
+axes[1].barh(comparison["home"], comparison["runs_2021"], color=colors)
+axes[1].axvline(league_avg_2021, linestyle="--", linewidth=1)
+axes[1].set_title("2021 Average Runs per Game", fontsize=13, fontweight="bold")
+axes[1].set_xlabel("Average Runs per Game")
+axes[1].set_xlim(0, comparison["runs_2021"].max() * 1.15)
+
+# Highlight Colorado annotation
+col_index = list(comparison["home"]).index("COL")
+col_2010 = comparison.loc[comparison["home"]=="COL","runs_2010"].iloc[0]
+col_2021 = comparison.loc[comparison["home"]=="COL","runs_2021"].iloc[0]
+
+axes[0].annotate(f"COL: {col_2010:.2f}",
+                 xy=(col_2010, col_index),
+                 xytext=(col_2010+0.5, col_index),
+                 fontsize=9,
+                 arrowprops=dict(arrowstyle="->"))
+
+axes[1].annotate(f"COL: {col_2021:.2f}",
+                 xy=(col_2021, col_index),
+                 xytext=(col_2021+0.5, col_index),
+                 fontsize=9,
+                 arrowprops=dict(arrowstyle="->"))
+
+# ---- Main Title ----
+fig.suptitle(
+    "Colorado Remains a High-Scoring Stadium, But Not Consistently the Highest (2010 vs 2021)",
+    fontsize=15,
+    fontweight="bold",
+    y=0.97   
+)
+
+##Create custom legend handles
+colorado_patch = plt.Rectangle((0, 0), 1, 1,
+                               color="darkorchid",
+                               label="Colorado (COL)")
+
+other_patch = plt.Rectangle((0, 0), 1, 1,
+                            color="lightgrey",
+                            label="Other Stadiums")
+## Add figure-level legend
+fig.legend(
+    handles=[colorado_patch, other_patch],
+    loc="upper center",
+    bbox_to_anchor=(0.5, 0.93),  # 控制 legend 具体位置
+    ncol=2,
+    frameon=False
+)
+
+fig.subplots_adjust(top=0.85)
+
+plt.show()
+```
