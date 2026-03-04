@@ -1,0 +1,339 @@
+---
+title: "The Four Stages of Visualization"
+subtitle: "A Framework for Creating Effective Data Visualizations"
+format: 
+  pptx:
+    aspect-ratio: 16:9
+    theme: default
+    slide-level: 2
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# The Four Stages of Visualization
+
+## Overview
+
+The four main stages of visualization:
+
+1. **Declaration of Purpose**
+2. **Curation of Content** 
+3. **Structuring of Visual Mappings**
+4. **Formatting for Your Audience**
+
+---
+
+# Stage 1: Declaration of Purpose
+
+> "Would you tell me, please, which way I ought to go from here?" 
+> "That depends a good deal on where you want to get to."
+> — Lewis Carroll, Alice in Wonderland
+
+## Key Points:
+- **Clear intention**: What message do you want to convey?
+- **Bold titles**: Use titles that state your recommendation
+- **Visual hierarchy**: Use color to guide attention
+
+---
+
+# Example: Clear Purpose in Visualization
+
+```{python}
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Decision alternatives and satisfaction values
+decisionArray = ["A","B","C","D","E"]
+satisfactionArray = [3,5,4,3,1]
+
+# Highlight the best decision
+bestUtility = max(satisfactionArray)
+colorArray = ["darkorchid" if utilityVal == bestUtility else "lightgrey" 
+              for utilityVal in satisfactionArray]
+
+# Create the visualization
+fig, ax = plt.subplots(figsize=[6,4], layout="constrained")
+ax.bar(x=decisionArray, height=satisfactionArray, color=colorArray)
+ax.set_xlabel("Decision Alternative")
+ax.set_ylabel("Utility")
+ax.set_title("Decision B is the Best Alternative")
+plt.show()
+```
+
+**Notice**: The title boldly states the recommendation, color draws attention to the best choice.
+
+---
+
+# Stage 2: Curation of Content
+
+> "If all you have is a hammer, everything looks like a nail." 
+> — Abraham Maslow
+
+## Key Points:
+- **Don't limit yourself to given data**
+- **Create or acquire all data you need**
+- **Use list comprehension and data manipulation**
+
+```python
+# Example: Create color array for highlighting
+colorArray = ["darkorchid" if utilityVal == bestUtility 
+              else "lightgrey" for utilityVal in satisfactionArray]
+```
+
+**Key insight**: This data didn't exist - it had to be created to fulfill the visualization purpose!
+
+---
+
+# Stage 3: Structuring of Visual Mappings
+
+## The Grammar of Graphics
+
+Three key components:
+
+1. **Geometry** (point, line, interval/bar)
+2. **Aesthetics** (position, color, size, shape)
+3. **Facets** (multiple similar graphics)
+
+---
+
+# Geometry and Aesthetics
+
+## Visual Encodings
+
+| Aesthetic | Handles Ordinal | Max Cardinality | Best For |
+|-----------|----------------|------------------|----------|
+| x/y position | ✓ | Infinite | Most important data |
+| color (discrete) | ✗ | < 12 | Categorical data |
+| color (continuous) | ✓ | depends | Numerical data |
+| size | ✓ | < 12 | Large differences |
+| marker | ✗ | < 12 | Categorical data |
+
+---
+
+# Good vs. Poor Aesthetic Choices
+
+## Effective: Bar Chart with Color Highlighting
+
+```{python}
+# Good choice: Bar chart with color highlighting
+fig, ax = plt.subplots(figsize=[6,4], layout="constrained")
+ax.bar(x=decisionArray, height=satisfactionArray, color=colorArray)
+ax.set_xlabel("Decision Alternative")
+ax.set_ylabel("Utility")
+ax.set_title("Decision B is the Best Alternative")
+plt.show()
+```
+
+**Mappings:**
+- Decision → horizontal position
+- Utility → vertical position  
+- Max utility → color
+
+---
+
+# Less Effective: Scatter Plot Alternative
+
+```{python}
+# Less compelling choice: Scatter plot
+shapeArray = ["*" if utilityVal == bestUtility else "o" for utilityVal in satisfactionArray]
+
+fig, ax = plt.subplots(figsize=[5,3.5], layout="constrained")
+
+# Plot each point separately due to marker limitation
+for satis, dec, col, shape in zip(satisfactionArray, decisionArray, colorArray, shapeArray):
+    ax.scatter(x=satis, y=dec, color=col, marker=shape, s=400)
+
+ax.set_xlabel("Utility")
+ax.set_ylabel("Decision Alternative")
+ax.set_title("Decision B is the Best Alternative")
+ax.invert_yaxis()
+plt.show()
+```
+
+**Why less effective**: Position mappings are less intuitive, harder to compare values
+
+---
+
+# Facets: Multiple Similar Graphics
+
+## Creating Faceted Visualizations
+
+```{python}
+# Create regional data for faceting
+regionArray = ["East","East","West","West","West"]
+plotDF = pd.DataFrame({"decision": decisionArray,
+                       "satisfaction": satisfactionArray,
+                       "region": regionArray})
+
+# Group by region
+groupedRegionDF = plotDF.groupby("region")
+
+# Create facets
+fig, axs = plt.subplots(ncols=len(groupedRegionDF), 
+                        figsize=[10,4], 
+                        layout="constrained",
+                        sharey=True)
+
+# Create each facet
+for idx, (region, groupDF) in enumerate(groupedRegionDF):
+    bestUtility = max(groupDF.satisfaction)
+    colorArray = ["darkorchid" if utilityVal == bestUtility else "lightgrey" 
+                  for utilityVal in groupDF.satisfaction]
+    
+    axs[idx].bar(x=groupDF.decision, height=groupDF.satisfaction, color=colorArray)
+    axs[idx].set_xlabel("Decision Alternative")
+    axs[idx].set_ylabel("Utility")
+    axs[idx].set_title(f"Region: {region}")
+
+fig.suptitle("Best Decision for Each Region")
+plt.show()
+```
+
+**Key**: Each facet uses the same geometry and aesthetic mappings, only the data changes.
+
+---
+
+# Stage 4: Formatting for Your Audience
+
+## From Rough to Polished
+
+### Minimal Formatting (Exploration Only)
+
+```{python}
+# Rough plot - good enough for you, not for audience
+fig, ax = plt.subplots(figsize=[4.5,3], layout="constrained")
+ax.bar(decisionArray, satisfactionArray)
+plt.show()
+```
+
+**This is fine for exploration, but not for sharing!**
+
+---
+
+# Adding Titles and Labels
+
+## Clear Communication
+
+```{python}
+# Add clear titles and labels
+fig, ax = plt.subplots(figsize=[5,3.5], layout="constrained")
+ax.bar(decisionArray, satisfactionArray)
+ax.set_title("Decision B is the Best Alternative")  # Message, not description
+ax.set_xlabel("Decision Alternative")               # Human readable
+ax.set_ylabel("Utility")                           # Clear units
+plt.show()
+```
+
+**Key principle**: Title should convey your message, not just describe the plot.
+
+---
+
+# Color Coding with Legends
+
+## Professional Legend Creation
+
+```{python}
+# Create plot with automatic legend
+fig, ax = plt.subplots(figsize=[6,4], layout="constrained")
+ax.set_title("Decision B is the Best Alternative")
+ax.set_xlabel("Decision Alternative")
+ax.set_ylabel("Utility")
+
+# Plot with labels for legend
+bestUtility = max(satisfactionArray)
+for decision, satisfaction in zip(decisionArray, satisfactionArray):
+    if satisfaction == bestUtility:
+        reco = ax.bar(decision, satisfaction, color="darkorchid", label="Recommended")
+        ax.scatter(decision, satisfaction/2, color="white", marker="*", s=400)
+    else:
+        unwise = ax.bar(decision, satisfaction, color="lightgrey", label="Unwise")
+
+ax.legend(handles=[reco, unwise])
+plt.show()
+```
+
+**Technique**: Use `label` argument and `handles` for clean legend creation.
+
+---
+
+# Annotations: Direct Communication
+
+## Adding Context and Caveats
+
+```{python}
+# Create plot with annotation
+fig, ax = plt.subplots(figsize=[6,4], layout="constrained")
+ax.set_title("Decision B is the Best Alternative")
+ax.set_xlabel("Decision Alternative")
+ax.set_ylabel("Utility")
+
+# Plot bars with legend
+bestUtility = max(satisfactionArray)
+for decision, satisfaction in zip(decisionArray, satisfactionArray):
+    if satisfaction == bestUtility:
+        reco = ax.bar(decision, satisfaction, color="darkorchid", label="Recommended")
+        best = ax.scatter(decision, satisfaction/2, color="orange", marker="*", s=300, label="Best Alternative")
+    else:
+        unwise = ax.bar(decision, satisfaction, color="lightgrey", label="Unwise")
+
+ax.legend(handles=[reco, unwise, best])
+
+# Add annotation for important caveat
+ax.annotate(text="Consider Decision C if sustainability\nis important. Utility did not include\nsustainability in its calculation.",
+            xy=("C", 3.5), xytext=("D", 1.2), 
+            horizontalalignment='center',
+            arrowprops=dict({"arrowstyle": "->"}))
+plt.show()
+```
+
+**Use annotations to:**
+- Highlight important points
+- Add context or caveats  
+- Guide audience attention
+
+---
+
+# Key Takeaways
+
+## The Four Stages Framework
+
+1. **Purpose**: Start with a clear message
+2. **Content**: Get/create all data you need
+3. **Mapping**: Choose geometry and aesthetics wisely
+4. **Formatting**: Polish for your audience
+
+## Remember:
+- Position is the most powerful aesthetic
+- Color works best for categorical data (< 12 categories)
+- Always use clear titles and labels
+- Don't skip the formatting stage for shared work
+
+---
+
+# Questions to Consider
+
+## For Your Next Visualization:
+
+- What is your main message?
+- What data do you need to support it?
+- Which geometry best represents your data?
+- How can you use aesthetics to guide attention?
+- What formatting will make it audience-ready?
+
+---
+
+# Resources
+
+## Further Learning
+
+- **Grammar of Graphics**: Wilkinson (2006), Wickham (2009)
+- **Designing Data Visualizations**: Noah Ilinsky
+- **Python for Data Analysis**: Wes McKinney
+- **Matplotlib Documentation**: https://matplotlib.org/stable/
+
+## Practice with:
+- Seaborn datasets (penguins, etc.)
+- Real-world data analysis projects
+- Creating both exploratory and presentation graphics
